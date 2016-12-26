@@ -6,10 +6,12 @@ import java.sql.SQLException;
 public class Application {
 
     private static UserRequestHandler requestHandler;
+    private static final boolean _withRedis = true;
 
     static {
         try {
-            requestHandler = new MainUserRequestHandler(new OracleDatabaseManager());
+            if (_withRedis) requestHandler = new MainUserRequestHandler(new OracleRedisDatabaseManager());
+            else requestHandler = new MainUserRequestHandler(new OracleDatabaseManager());
         } catch (SQLException e) {
             System.out.println(e.toString());
             System.exit(1);

@@ -2,8 +2,6 @@ package tk.whitephilosophy.courcework1;
 
 import java.security.InvalidParameterException;
 import java.sql.*;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Properties;
 
 public class OracleDatabaseManager implements DatabaseManager {
@@ -38,11 +36,12 @@ public class OracleDatabaseManager implements DatabaseManager {
         connected = true;
     }
 
-    private void executeQuery(String query, ResultSetFunction rsf) throws SQLException {
+    private String executeQuery(String query, ResultSetFunction rsf) throws SQLException {
         Statement statement = null;
         try {
             statement = connection.createStatement();
-            rsf.process(statement.executeQuery(query));
+            String result = rsf.process(statement.executeQuery(query));
+            return result;
         } catch (SQLException e ) {
             throw new SQLException(e.getMessage());
         } finally {
@@ -51,34 +50,27 @@ public class OracleDatabaseManager implements DatabaseManager {
     }
 
     private void executeQuery(String query) throws SQLException {
-        executeQuery(query, (rs) -> {});
+        executeQuery(query, (rs) -> null);
     }
 
     @Override
-    public void viewAll(String table) throws SQLException {
-        executeQuery("SELECT * FROM ORDERS " +
+    public String viewCustomer(String firstname, String middlename, String lastname, ResultSetFunction rsf) throws SQLException {
+        return executeQuery("SELECT * FROM ORDERS " +
                 "INNER JOIN CUSTOMERS ON ORDERS.CUSTOMER_ID=CUSTOMERS.ID " +
                 "INNER JOIN PRODUCTION ON ORDERS.PRODUCT_ID = PRODUCTION.ID " +
-                "INNER JOIN PHONES ON PHONES.ID = PRODUCTION.PHONE_ID",
-            (rs) -> {
-                List<List<String>> rowList = new LinkedList<>();
-                while (rs.next()) {
-                    List<String> columnList = new LinkedList<>();
-                    rowList.add(columnList);
-                    for (int column = 1;
-                         column <= rs.getMetaData().getColumnCount(); column++) {
-                        Object value = rs.getObject(column);
-                        if (value != null)
-                            columnList.add(value.toString());
-                    }
-                }
-                for (List<String> row: rowList) {
-                    for (String value: row) {
-                        System.out.print(value + "\t");
-                    }
-                    System.out.println("");
-                }
-            });
+                "INNER JOIN PHONES ON PHONES.ID = PRODUCTION.PHONE_ID " +
+                "WHERE CUSTOMERS.FIRSTNAME='" + firstname + "' AND "+
+                "CUSTOMERS.MIDDLENAME='" + middlename  + "' AND " +
+                "CUSTOMERS.LASTNAME='" + lastname + "' "
+                , rsf);
+    }
+
+    @Override
+    public String viewAll(ResultSetFunction rsf) throws SQLException {
+        return executeQuery("SELECT * FROM ORDERS " +
+                "INNER JOIN CUSTOMERS ON ORDERS.CUSTOMER_ID=CUSTOMERS.ID " +
+                "INNER JOIN PRODUCTION ON ORDERS.PRODUCT_ID = PRODUCTION.ID " +
+                "INNER JOIN PHONES ON PHONES.ID = PRODUCTION.PHONE_ID", rsf);
     }
 
     @Override
