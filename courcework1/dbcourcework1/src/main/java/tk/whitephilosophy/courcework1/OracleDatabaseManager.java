@@ -66,14 +66,6 @@ public class OracleDatabaseManager implements DatabaseManager {
     }
 
     @Override
-    public String viewAll(ResultSetFunction rsf) throws SQLException {
-        return executeQuery("SELECT * FROM ORDERS " +
-                "INNER JOIN CUSTOMERS ON ORDERS.CUSTOMER_ID=CUSTOMERS.ID " +
-                "INNER JOIN PRODUCTION ON ORDERS.PRODUCT_ID = PRODUCTION.ID " +
-                "INNER JOIN PHONES ON PHONES.ID = PRODUCTION.PHONE_ID", rsf);
-    }
-
-    @Override
     public void addOrder(String[] params) throws SQLException, InvalidParameterException {
         if (params.length != 6) {
             throw new InvalidParameterException("addOrder params array is too short");
@@ -88,12 +80,13 @@ public class OracleDatabaseManager implements DatabaseManager {
     }
 
     @Override
-    public void updateCustomer(String field, int id, String value) throws SQLException {
+    public void updateCustomer(String field, String firstname, String middlename, String lastname, String value) throws SQLException {
         switch (field) {
             case "firstname":
                 executeQuery( "BEGIN " +
                         "CRUD_OPS.UPDATE_CUSTOMER_INFO('" +
-                        id + "', '" + value +
+                        firstname + "', '" + middlename + "', '" + lastname +
+                        "', '" + value +
                         "', '', '' , '' , ''); " +
                         "END;");
                 break;

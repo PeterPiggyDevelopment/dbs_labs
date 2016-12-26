@@ -17,16 +17,23 @@ public class MainUserRequestHandler implements UserRequestHandler{
     private String processResSet(ResultSet rs) throws SQLException {
         String result = "";
         List<List<String>> rowList = new LinkedList<>();
+        ResultSetMetaData md = rs.getMetaData();
+        int c = 0;
         while (rs.next()) {
+            ++c;
             List<String> columnList = new LinkedList<>();
             rowList.add(columnList);
-            for (int column = 1;
-                 column <= rs.getMetaData().getColumnCount(); column++) {
+            for (int column = 1; column <= md.getColumnCount(); column++) {
                 Object value = rs.getObject(column);
                 if (value != null)
                     columnList.add(value.toString());
             }
         }
+        if (c == 0) return "Not found";
+        for (int column = 1; column <= md.getColumnCount(); column++) {
+            result +=  md.getColumnName(column) + "\t";
+        }
+        result += "\n";
         for (List<String> row: rowList) {
             for (String value: row) {
                 result += value + "\t";
@@ -61,7 +68,7 @@ public class MainUserRequestHandler implements UserRequestHandler{
             case "retrieve":
                 switch (subject) {
                     case "customer":
-                        if (params.length < 3) {
+                        if (params.length != 3) {
                             System.out.println("USAGE: App " + command + " " + subject + " firstname middlename lastname");
                             System.exit(1);
                         }
@@ -72,24 +79,16 @@ public class MainUserRequestHandler implements UserRequestHandler{
                             System.exit(1);
                         }
                         break;
-
-                    case "all":
-                        try {
-                            System.out.println(_dManager.viewAll(this::processResSet));
-                        } catch (SQLException e) {
-                            System.out.println(e.toString());
-                            System.exit(1);
-                        }
-                        break;
                 }
                 break;
             case "update":
-                if (params.length < 2) {
-                    System.out.println("USAGE: App " + command + " " + subject + " args");
+                if (params.length != 4) {
+                    System.out.println("USAGE: App " + command + " " + subject + " fisrtname middlename lastname value");
                     System.exit(1);
                 }
                 try {
-                    _dManager.updateCustomer(subject, Integer.parseInt(params[1]), params[0]);
+                    _dManager.updateCustomer(subject, params[0], params[1], params[2], params[3]);
+                    System.out.println("Successfully updated");
                 } catch (SQLException e) {
                     System.out.println(e.toString());
                     System.exit(1);
@@ -114,6 +113,8 @@ public class MainUserRequestHandler implements UserRequestHandler{
                         break;
                 }
                 break;
+            default:
+                    System.out.println("Invalid command: " + command);
         }
     }
 }
