@@ -30,9 +30,11 @@ public class MainUserRequestHandler implements UserRequestHandler{
             }
         }
         if (c == 0) return "Not found";
+        /*
         for (int column = 1; column <= md.getColumnCount(); column++) {
             result +=  md.getColumnName(column) + "\t";
         }
+        */
         result += "\n";
         for (List<String> row: rowList) {
             for (String value: row) {
@@ -83,7 +85,10 @@ public class MainUserRequestHandler implements UserRequestHandler{
                 break;
             case "update":
                 if (params.length != 4) {
-                    System.out.println("USAGE: App " + command + " " + subject + " fisrtname middlename lastname value");
+                    System.out.println("USAGE: App " + command + " subject  fisrtname middlename lastname value");
+                    for (String param: params ) {
+                        System.out.println(param);
+                    }
                     System.exit(1);
                 }
                 try {

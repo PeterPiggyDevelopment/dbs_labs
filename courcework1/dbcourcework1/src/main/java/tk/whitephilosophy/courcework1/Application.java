@@ -19,6 +19,7 @@ public class Application {
     }
 
     public static void main(String[] args) {
+        System.out.println("hell");
         if (args.length < 3){
             System.out.println("USAGE: Application command subject params");
             System.exit(1);
